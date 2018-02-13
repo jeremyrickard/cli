@@ -68,6 +68,8 @@ var _ = Describe("install-plugin command", func() {
 		})
 
 		Context("when the local file does not exist", func() {
+			binaryName = "faceman"
+			fakeConfig.BinaryNameReturns(binaryName)
 			BeforeEach(func() {
 				fakeActor.FileExistsReturns(false)
 			})
