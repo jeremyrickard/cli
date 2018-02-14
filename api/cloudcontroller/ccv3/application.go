@@ -8,6 +8,7 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/internal"
+	"code.cloudfoundry.org/cli/cf/manifest"
 )
 
 // Application represents a Cloud Controller V3 Application.
@@ -243,4 +244,24 @@ func (client *Client) StartApplication(appGUID string) (Application, Warnings, e
 	err = client.connection.Make(request, &response)
 
 	return responseApp, response.Warnings, err
+}
+
+// TODO: marshal manifest app object to yaml
+// CreateApplicationActionsApplyManifestByApplication starts the given application.
+func (client *Client) CreateApplicationActionsApplyManifestByApplication(manifestApps manifest.Applications, appGUID string) (Warnings, error) {
+	// request, err := client.newHTTPRequest(requestOptions{
+	// 	RequestName: internal.PostApplicationStartRequest,
+	// 	URIParams:   map[string]string{"app_guid": appGUID},
+	// })
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// var responseApp Application
+	// response := cloudcontroller.Response{
+	// 	Result: &responseApp,
+	// }
+	// err = client.connection.Make(request, &response)
+
+	return nil, nil
 }

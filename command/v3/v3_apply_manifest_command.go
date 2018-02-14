@@ -18,20 +18,17 @@ import (
 
 type V3ApplyManifestActor interface {
 	CloudControllerAPIVersion() string
-	CreateApplicationApplyManifest()
-	// GetApplicationByNameAndSpace(appName string, spaceGUID string) (v3action.Application, v3action.Warnings, error)
-	// StartApplication(appGUID string) (v3action.Application, v3action.Warnings, error)
-	// StopApplication(appGUID string) (v3action.Warnings, error)
+	ApplyApplicationManifest(path string, spaceGUID string) (v3action.Warnings, error)
 }
 
 type V3ApplyManifestCommand struct {
-	usage interface{} `usage:"CF_NAME v3-restart APP_NAME"`
+	usage          interface{}                 `usage:"CF_NAME v3-apply-manifest -f APP_MANIFESTPATH"`
+	PathToManifest flag.PathWithExistenceCheck `short:"f" description:"Path to app manifest"`
 
-	PathToManifest flag.PathWithExistenceCheck
-	UI             command.UI
-	Config         command.Config
-	SharedActor    command.SharedActor
-	Actor          V3ApplyManifestActor
+	UI          command.UI
+	Config      command.Config
+	SharedActor command.SharedActor
+	Actor       V3ApplyManifestActor
 }
 
 func (cmd *V3ApplyManifestCommand) Setup(config command.Config, ui command.UI) error {
@@ -49,12 +46,11 @@ func (cmd *V3ApplyManifestCommand) Setup(config command.Config, ui command.UI) e
 	}
 	cmd.Actor = v3action.NewActor(ccClient, config, nil, nil)
 
-	return nil:q
+	return nil
 }
 
 func (cmd V3ApplyManifestCommand) Execute(args []string) error {
-	var pathToManifest string
-	// if not used throughout, move down later
+	pathToManifest := cmd.PathToManifest
 
 	cmd.UI.DisplayText(command.ExperimentalWarning)
 	cmd.UI.DisplayNewline()
@@ -75,8 +71,6 @@ func (cmd V3ApplyManifestCommand) Execute(args []string) error {
 	}
 
 	// validate that manifest is present
-	pathToManifest = string(cmd.PathToManifest)
-
 	_, err = os.Stat(pathToManifest)
 	if err != nil {
 		return translatableerror.FileNotFoundError{
@@ -84,29 +78,11 @@ func (cmd V3ApplyManifestCommand) Execute(args []string) error {
 		}
 	}
 
-	// read the manifest
-	// retrieve app name from manifest
-
-	// get app GUID
-	// app, warnings, err := cmd.Actor.GetApplicationByNameAndSpace(cmd.RequiredArgs.AppName, cmd.Config.TargetedSpace().GUID)
-	// cmd.UI.DisplayWarnings(warnings)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if app.Started() {
-	// 	cmd.UI.DisplayTextWithFlavor("Stopping app {{.AppName}} in org {{.OrgName}} / space {{.SpaceName}} as {{.Username}}...", map[string]interface{}{
-	// 		"AppName":   cmd.RequiredArgs.AppName,
-	// 		"OrgName":   cmd.Config.TargetedOrganization().Name,
-	// 		"SpaceName": cmd.Config.TargetedSpace().Name,
-	// 		"Username":  user.Name,
-	// 	})
-
-	// 	warnings, err = cmd.Actor.StopApplication(app.GUID)
-	// 	cmd.UI.DisplayWarnings(warnings)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+	app, warnings, err := cmd.Actor.ApplyApplicationManifest(pathToManifest, cmd.Config.TargetedSpace().GUID)
+	cmd.UI.DisplayWarnings(warnings)
+	if err != nil {
+		return err
+	}
 
 	// 	cmd.UI.DisplayOK()
 	// }
