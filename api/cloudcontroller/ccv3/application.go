@@ -8,7 +8,7 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/internal"
-	"code.cloudfoundry.org/cli/cf/manifest"
+	"code.cloudfoundry.org/cli/util/manifest"
 )
 
 // Application represents a Cloud Controller V3 Application.

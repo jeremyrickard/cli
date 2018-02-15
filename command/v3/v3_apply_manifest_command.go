@@ -64,33 +64,23 @@ func (cmd V3ApplyManifestCommand) Execute(args []string) error {
 		return err
 	}
 
-	_, err = cmd.Config.CurrentUser()
+	user, err := cmd.Config.CurrentUser()
 	if err != nil {
 		return err
 	}
 
-	app, warnings, err := cmd.Actor.ApplyApplicationManifest(pathToManifest, cmd.Config.TargetedSpace().GUID)
+	warnings, err := cmd.Actor.ApplyApplicationManifest(pathToManifest, cmd.Config.TargetedSpace().GUID)
 	cmd.UI.DisplayWarnings(warnings)
 	if err != nil {
 		return err
 	}
 
-	// 	cmd.UI.DisplayOK()
-	// }
-
-	// cmd.UI.DisplayTextWithFlavor("Starting app {{.AppName}} in org {{.OrgName}} / space {{.SpaceName}} as {{.Username}}...", map[string]interface{}{
-	// 	"AppName":   cmd.RequiredArgs.AppName,
-	// 	"OrgName":   cmd.Config.TargetedOrganization().Name,
-	// 	"SpaceName": cmd.Config.TargetedSpace().Name,
-	// 	"Username":  user.Name,
-	// })
-
-	// _, warnings, err = cmd.Actor.StartApplication(app.GUID)
-
-	// cmd.UI.DisplayWarnings(warnings)
-	// if err != nil {
-	// 	return err
-	// }
+	cmd.UI.DisplayTextWithFlavor("Applying manifest {{.ManifestPath}} in org {{.OrgName}} / space {{.SpaceName}} as {{.Username}}...", map[string]interface{}{
+		"ManifestPath": pathToManifest,
+		"OrgName":      cmd.Config.TargetedOrganization().Name,
+		"SpaceName":    cmd.Config.TargetedSpace().Name,
+		"Username":     user.Name,
+	})
 
 	cmd.UI.DisplayOK()
 

@@ -2,6 +2,10 @@ package v3_test
 
 import (
 	"errors"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"regexp"
 
 	"code.cloudfoundry.org/cli/actor/actionerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccversion"
@@ -97,7 +101,6 @@ var _ = FDescribe("v3-apply-manifest Command", func() {
 	})
 
 	Context("when the user is logged in", func() {
-		var expectedErr error
 
 		BeforeEach(func() {
 			fakeConfig.TargetedOrganizationReturns(configv3.Organization{
@@ -110,27 +113,51 @@ var _ = FDescribe("v3-apply-manifest Command", func() {
 			fakeConfig.CurrentUserReturns(configv3.User{Name: "steve"}, nil)
 		})
 
-		Context("when the path to the manifest file is invalid", func() {
+		Context("when a path to the manifest is provided", func() {
+			var (
+				tmpDir       string
+				providedPath string
+				originalDir  string
+				err          error
+			)
+
 			BeforeEach(func() {
-				cmd.PathToManifest = ""
-				expectedErr = translatableerror.FileNotFoundError{Path: string(cmd.PathToManifest)}
+				tmpDir, err = ioutil.TempDir("", "v3-apply-manifest-test")
+				Expect(err).ToNot(HaveOccurred())
+				// OS X uses weird symlinks that causes problems for some tests
+				tmpDir, err = filepath.EvalSymlinks(tmpDir)
+				Expect(err).ToNot(HaveOccurred())
+
+				originalDir, err = os.Getwd()
+				Expect(err).ToNot(HaveOccurred())
+				providedPath = filepath.Join(tmpDir, "manifest.yml")
 			})
 
-			It("return an error", func() {
-				Expect(executeErr).To(Equal(expectedErr))
-			})
-		})
+			Context("when the manifest.yml file does not exist", func() {
+				BeforeEach(func() {
+					cmd.PathToManifest = flag.PathWithExistenceCheck(providedPath)
+				})
 
-		FContext("when the path to the manifest file is valid", func() {
-			BeforeEach(func() {
-				cmd.PathToManifest = flag.PathWithExistenceCheck("some-valid-path")
+				It("return an error", func() {
+					Expect(os.IsNotExist(executeErr)).To(BeTrue())
+				})
 			})
 
-			Context("when the manifest file is valid YAML", func() {
-				Context("when the manifest file contains an app name", func() {
-					It("displays the success text", func() {
-						Expect(testUI).To(Say("Applying manifest some-valid-path in org some-org / space some-space as steve..."))
-						Expect(testUI).To(Say("OK"))
+			Context("when the path to the manifest file is valid", func() {
+				BeforeEach(func() {
+					err := ioutil.WriteFile(providedPath, []byte(`key: "value"`), 0666)
+					Expect(err).ToNot(HaveOccurred())
+
+					cmd.PathToManifest = flag.PathWithExistenceCheck(providedPath)
+				})
+
+				Context("when the manifest file is valid YAML", func() {
+					Context("when the manifest file contains an app name", func() {
+						It("displays the success text", func() {
+							Expect(executeErr).ToNot(HaveOccurred())
+							Expect(testUI.Out).To(Say("Applying manifest %s in org some-org / space some-space as steve...", regexp.QuoteMeta(providedPath)))
+							Expect(testUI.Out).To(Say("OK"))
+						})
 					})
 				})
 			})

@@ -4,6 +4,7 @@ package v3fakes
 import (
 	"sync"
 
+	"code.cloudfoundry.org/cli/actor/v3action"
 	"code.cloudfoundry.org/cli/command/v3"
 )
 
@@ -16,6 +17,20 @@ type FakeV3ApplyManifestActor struct {
 	}
 	cloudControllerAPIVersionReturnsOnCall map[int]struct {
 		result1 string
+	}
+	ApplyApplicationManifestStub        func(path string, spaceGUID string) (v3action.Warnings, error)
+	applyApplicationManifestMutex       sync.RWMutex
+	applyApplicationManifestArgsForCall []struct {
+		path      string
+		spaceGUID string
+	}
+	applyApplicationManifestReturns struct {
+		result1 v3action.Warnings
+		result2 error
+	}
+	applyApplicationManifestReturnsOnCall map[int]struct {
+		result1 v3action.Warnings
+		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -61,11 +76,65 @@ func (fake *FakeV3ApplyManifestActor) CloudControllerAPIVersionReturnsOnCall(i i
 	}{result1}
 }
 
+func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifest(path string, spaceGUID string) (v3action.Warnings, error) {
+	fake.applyApplicationManifestMutex.Lock()
+	ret, specificReturn := fake.applyApplicationManifestReturnsOnCall[len(fake.applyApplicationManifestArgsForCall)]
+	fake.applyApplicationManifestArgsForCall = append(fake.applyApplicationManifestArgsForCall, struct {
+		path      string
+		spaceGUID string
+	}{path, spaceGUID})
+	fake.recordInvocation("ApplyApplicationManifest", []interface{}{path, spaceGUID})
+	fake.applyApplicationManifestMutex.Unlock()
+	if fake.ApplyApplicationManifestStub != nil {
+		return fake.ApplyApplicationManifestStub(path, spaceGUID)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.applyApplicationManifestReturns.result1, fake.applyApplicationManifestReturns.result2
+}
+
+func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestCallCount() int {
+	fake.applyApplicationManifestMutex.RLock()
+	defer fake.applyApplicationManifestMutex.RUnlock()
+	return len(fake.applyApplicationManifestArgsForCall)
+}
+
+func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestArgsForCall(i int) (string, string) {
+	fake.applyApplicationManifestMutex.RLock()
+	defer fake.applyApplicationManifestMutex.RUnlock()
+	return fake.applyApplicationManifestArgsForCall[i].path, fake.applyApplicationManifestArgsForCall[i].spaceGUID
+}
+
+func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestReturns(result1 v3action.Warnings, result2 error) {
+	fake.ApplyApplicationManifestStub = nil
+	fake.applyApplicationManifestReturns = struct {
+		result1 v3action.Warnings
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestReturnsOnCall(i int, result1 v3action.Warnings, result2 error) {
+	fake.ApplyApplicationManifestStub = nil
+	if fake.applyApplicationManifestReturnsOnCall == nil {
+		fake.applyApplicationManifestReturnsOnCall = make(map[int]struct {
+			result1 v3action.Warnings
+			result2 error
+		})
+	}
+	fake.applyApplicationManifestReturnsOnCall[i] = struct {
+		result1 v3action.Warnings
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeV3ApplyManifestActor) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.cloudControllerAPIVersionMutex.RLock()
 	defer fake.cloudControllerAPIVersionMutex.RUnlock()
+	fake.applyApplicationManifestMutex.RLock()
+	defer fake.applyApplicationManifestMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
