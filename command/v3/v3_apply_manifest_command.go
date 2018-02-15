@@ -2,7 +2,6 @@ package v3
 
 import (
 	"net/http"
-	"os"
 
 	"code.cloudfoundry.org/cli/actor/sharedaction"
 	"code.cloudfoundry.org/cli/actor/v3action"
@@ -50,7 +49,7 @@ func (cmd *V3ApplyManifestCommand) Setup(config command.Config, ui command.UI) e
 }
 
 func (cmd V3ApplyManifestCommand) Execute(args []string) error {
-	pathToManifest := cmd.PathToManifest
+	pathToManifest := string(cmd.PathToManifest)
 
 	cmd.UI.DisplayText(command.ExperimentalWarning)
 	cmd.UI.DisplayNewline()
@@ -68,14 +67,6 @@ func (cmd V3ApplyManifestCommand) Execute(args []string) error {
 	_, err = cmd.Config.CurrentUser()
 	if err != nil {
 		return err
-	}
-
-	// validate that manifest is present
-	_, err = os.Stat(pathToManifest)
-	if err != nil {
-		return translatableerror.FileNotFoundError{
-			Path: pathToManifest,
-		}
 	}
 
 	app, warnings, err := cmd.Actor.ApplyApplicationManifest(pathToManifest, cmd.Config.TargetedSpace().GUID)

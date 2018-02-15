@@ -7,7 +7,6 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
-	"code.cloudfoundry.org/cli/util/manifest"
 )
 
 // Application represents a V3 actor application.
@@ -198,33 +197,4 @@ func (actor Actor) processStatus(process ccv3.Process, warningsChannel chan<- Wa
 
 	// all of the instances are crashed at this point
 	return true, nil
-}
-
-func (actor Actor) ApplyApplicationManifest(pathToManifest string, spaceGUID string) (Warnings, error) {
-	var allWarnings Warnings
-
-	manifestApps, err := manifest.ReadAndMergeManifests(pathToManifest)
-	if err != nil {
-		return nil, err // return allWarnings, err?
-	}
-
-	appName := manifestApps[0].Name
-	app, getAppWarnings, err := actor.GetApplicationByNameAndSpace(appName, spaceGUID)
-
-	allWarnings = append(allWarnings, getAppWarnings...)
-	if err != nil {
-		return allWarnings, err
-	}
-
-	// pass in manifestApps or just manifestApps[0]?
-	jobURL, applyManifestWarnings, err := actor.CloudControllerClient.CreateApplicationActionsApplyManifestByApplication(manifestApps, app.GUID)
-	allWarnings = append(allWarnings, applyManifestWarnings...)
-	if err != nil {
-		return allWarnings, err
-	}
-
-	// pollWarnings, err := actor.CloudControllerClient.PollJob(jobURL)
-	// allWarnings = append(allWarnings, pollWarnings...)
-	// return allWarnings, err
-	return nil, nil
 }

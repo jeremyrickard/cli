@@ -246,9 +246,8 @@ func (client *Client) StartApplication(appGUID string) (Application, Warnings, e
 	return responseApp, response.Warnings, err
 }
 
-// TODO: marshal manifest app object to yaml
 // CreateApplicationActionsApplyManifestByApplication starts the given application.
-func (client *Client) CreateApplicationActionsApplyManifestByApplication(manifestApps manifest.Applications, appGUID string) (Warnings, error) {
+func (client *Client) CreateApplicationActionsApplyManifestByApplication(manifestApp manifest.Application, appGUID string) (string, Warnings, error) {
 	// request, err := client.newHTTPRequest(requestOptions{
 	// 	RequestName: internal.PostApplicationStartRequest,
 	// 	URIParams:   map[string]string{"app_guid": appGUID},
@@ -263,5 +262,5 @@ func (client *Client) CreateApplicationActionsApplyManifestByApplication(manifes
 	// }
 	// err = client.connection.Make(request, &response)
 
-	return nil, nil
+	return "", nil, nil
 }
