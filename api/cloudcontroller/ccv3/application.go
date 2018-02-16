@@ -8,7 +8,6 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/internal"
-	"code.cloudfoundry.org/cli/util/manifest"
 )
 
 // Application represents a Cloud Controller V3 Application.
@@ -141,6 +140,26 @@ func (client *Client) CreateApplication(app Application) (Application, Warnings,
 	return responseApp, response.Warnings, err
 }
 
+// CreateApplicationActionsApplyManifestByApplication
+func (client *Client) CreateApplicationActionsApplyManifestByApplication(rawManifest []byte, appGUID string) (string, Warnings, error) {
+	request, err := client.newHTTPRequest(requestOptions{
+		RequestName: internal.PostApplicationManifest,
+		URIParams:   map[string]string{"app_guid": appGUID},
+		Body:        bytes.NewReader(rawManifest),
+	})
+
+	if err != nil {
+		return "", nil, err
+	}
+
+	request.Header.Set("Content-Type", "application/x-yaml")
+
+	response := cloudcontroller.Response{}
+	err = client.connection.Make(request, &response)
+
+	return response.ResourceLocationURL, response.Warnings, err
+}
+
 // DeleteApplication deletes the app with the given app GUID.
 func (client *Client) DeleteApplication(appGUID string) (string, Warnings, error) {
 	request, err := client.newHTTPRequest(requestOptions{
@@ -244,23 +263,4 @@ func (client *Client) StartApplication(appGUID string) (Application, Warnings, e
 	err = client.connection.Make(request, &response)
 
 	return responseApp, response.Warnings, err
-}
-
-// CreateApplicationActionsApplyManifestByApplication starts the given application.
-func (client *Client) CreateApplicationActionsApplyManifestByApplication(manifestApp manifest.Application, appGUID string) (string, Warnings, error) {
-	// request, err := client.newHTTPRequest(requestOptions{
-	// 	RequestName: internal.PostApplicationStartRequest,
-	// 	URIParams:   map[string]string{"app_guid": appGUID},
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// var responseApp Application
-	// response := cloudcontroller.Response{
-	// 	Result: &responseApp,
-	// }
-	// err = client.connection.Make(request, &response)
-
-	return "", nil, nil
 }

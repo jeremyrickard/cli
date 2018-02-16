@@ -18,10 +18,10 @@ type FakeV3ApplyManifestActor struct {
 	cloudControllerAPIVersionReturnsOnCall map[int]struct {
 		result1 string
 	}
-	ApplyApplicationManifestStub        func(path string, spaceGUID string) (v3action.Warnings, error)
+	ApplyApplicationManifestStub        func(parser v3action.ManifestParser, spaceGUID string) (v3action.Warnings, error)
 	applyApplicationManifestMutex       sync.RWMutex
 	applyApplicationManifestArgsForCall []struct {
-		path      string
+		parser    v3action.ManifestParser
 		spaceGUID string
 	}
 	applyApplicationManifestReturns struct {
@@ -76,17 +76,17 @@ func (fake *FakeV3ApplyManifestActor) CloudControllerAPIVersionReturnsOnCall(i i
 	}{result1}
 }
 
-func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifest(path string, spaceGUID string) (v3action.Warnings, error) {
+func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifest(parser v3action.ManifestParser, spaceGUID string) (v3action.Warnings, error) {
 	fake.applyApplicationManifestMutex.Lock()
 	ret, specificReturn := fake.applyApplicationManifestReturnsOnCall[len(fake.applyApplicationManifestArgsForCall)]
 	fake.applyApplicationManifestArgsForCall = append(fake.applyApplicationManifestArgsForCall, struct {
-		path      string
+		parser    v3action.ManifestParser
 		spaceGUID string
-	}{path, spaceGUID})
-	fake.recordInvocation("ApplyApplicationManifest", []interface{}{path, spaceGUID})
+	}{parser, spaceGUID})
+	fake.recordInvocation("ApplyApplicationManifest", []interface{}{parser, spaceGUID})
 	fake.applyApplicationManifestMutex.Unlock()
 	if fake.ApplyApplicationManifestStub != nil {
-		return fake.ApplyApplicationManifestStub(path, spaceGUID)
+		return fake.ApplyApplicationManifestStub(parser, spaceGUID)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -100,10 +100,10 @@ func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestCallCount() int {
 	return len(fake.applyApplicationManifestArgsForCall)
 }
 
-func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestArgsForCall(i int) (string, string) {
+func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestArgsForCall(i int) (v3action.ManifestParser, string) {
 	fake.applyApplicationManifestMutex.RLock()
 	defer fake.applyApplicationManifestMutex.RUnlock()
-	return fake.applyApplicationManifestArgsForCall[i].path, fake.applyApplicationManifestArgsForCall[i].spaceGUID
+	return fake.applyApplicationManifestArgsForCall[i].parser, fake.applyApplicationManifestArgsForCall[i].spaceGUID
 }
 
 func (fake *FakeV3ApplyManifestActor) ApplyApplicationManifestReturns(result1 v3action.Warnings, result2 error) {
