@@ -140,7 +140,8 @@ func (client *Client) CreateApplication(app Application) (Application, Warnings,
 	return responseApp, response.Warnings, err
 }
 
-// CreateApplicationActionsApplyManifestByApplication
+// CreateApplicationActionsApplyManifestByApplication applies the manifest to
+// the given application.
 func (client *Client) CreateApplicationActionsApplyManifestByApplication(rawManifest []byte, appGUID string) (string, Warnings, error) {
 	request, err := client.newHTTPRequest(requestOptions{
 		RequestName: internal.PostApplicationManifest,
