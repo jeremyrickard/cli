@@ -144,7 +144,7 @@ var _ = Describe("service command", func() {
 				)
 
 				BeforeEach(func() {
-					domain = defaultSharedDomain()
+					domain = helpers.DefaultSharedDomain()
 					service = helpers.PrefixedRandomName("SERVICE")
 					servicePlan = helpers.PrefixedRandomName("SERVICE-PLAN")
 
@@ -239,7 +239,7 @@ var _ = Describe("service command", func() {
 			sourceSpaceName = helpers.NewSpaceName()
 			setupCF(orgName, sourceSpaceName)
 
-			domain := defaultSharedDomain()
+			domain := helpers.DefaultSharedDomain()
 			service = helpers.PrefixedRandomName("SERVICE")
 			servicePlan = helpers.PrefixedRandomName("SERVICE-PLAN")
 			broker = helpers.NewServiceBroker(helpers.NewServiceBrokerName(), helpers.NewAssets().ServiceBroker, domain, service, servicePlan)
